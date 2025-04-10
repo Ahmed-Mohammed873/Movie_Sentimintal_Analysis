@@ -1,0 +1,20 @@
+import gradio as gr
+
+def predict_sentiment_tfidf(text):
+    processed_review = preprocess_text(text)
+    review_tfidf = vectorizer.transform([processed_review])
+    prediction = model_lr.predict(review_tfidf)[0]
+    return f"Predicted Sentiment: {prediction}"
+    
+with gr.Blocks() as interface:
+    gr.Markdown("# Movie Review Sentiment Analysis App")
+    gr.Markdown("# Devolpe by Kira")
+    gr.Markdown("Enter a review, and the model will predict if it's Positive or Negative.")
+    text_input = gr.Textbox(label="Enter a Review")
+    output = gr.Textbox(label="Sentiment Prediction", interactive=False)
+
+    analyze_button = gr.Button("Analyze")
+    analyze_button.click(predict_sentiment_tfidf, inputs=text_input, outputs=output)
+
+# Launch the app
+interface.launch(share=True)
