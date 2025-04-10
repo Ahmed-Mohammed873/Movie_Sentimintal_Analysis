@@ -1,0 +1,52 @@
+import numpy as np
+import pandas as pd
+import nltk
+import re
+import joblib
+import pickle
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# reading the data 
+train_df = pd.read_csv('C:\\Users\\ahmed\\Downloads\\IMDB_Balanced_10000_Rows.csv')
+train_df
+
+# Download and removing Stop word
+  nltk.download("stopwords")
+
+  def preprocess_text(text):
+    text = text.lower()
+    text = re.sub(r"\W", " ", text)  
+    text = re.sub(r"\s+", " ", text).strip()  
+    stop_words = set(stopwords.words("english"))
+    text = " ".join(word for word in text.split() if word not in stop_words)
+    return text
+
+train_df["cleaned_review"] = train_df["review"].astype(str).apply(preprocess_text)
+
+# split Data
+X = train_df["cleaned_review"]
+y = train_df['sentiment']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Modeling
+vectorizer = TfidfVectorizer(max_features=10000, ngram_range=(1, 2),stop_words='english',min_df=5)
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+model_lr = LogisticRegression(max_iter=1000)
+model_lr.fit(X_train_tfidf, y_train)
+
+# calculate the Accurecy
+
+y_lr_pred = model_lr.predict(X_test_tfidf)
+accuracy = accuracy_score(y_test, y_lr_pred)
+print(f"Logistic Regression Accuracy: {accuracy:.3f}")
+
+  # Accuracy is 87.2%
+  
